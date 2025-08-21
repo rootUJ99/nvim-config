@@ -42,15 +42,17 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim', config = true  },
+      -- 'williamboman/mason.nvim',
+      { 'williamboman/mason.nvim', cmd = 'Mason', config = true },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
+      'j-hui/fidget.nvim',
 
       -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
+      -- 'folke/neodev.nvim',
+      { 'folke/neodev.nvim', opts = {} },
     },
   },
 
@@ -113,25 +115,114 @@ require('lazy').setup({
     "rebelot/kanagawa.nvim",
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'kanagawa-dragon'
+      vim.cmd.colorscheme 'kanagawa'
     end,
   },
   -- { 
   --   "nyoom-engineering/oxocarbon.nvim"
   -- },
   {
+    'neovim/nvim-lspconfig',
+    dependencies = {
+      -- Add nvim-navic as a dependency
+      { 'SmiteshP/nvim-navic', opts = {} },
+      -- ... your other dependencies (mason, etc.)
+    },
+  },
+  {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    opts = {
-      options = {
-        icons_enabled = true,
-        theme = 'auto',
-        component_separators = '|',
-        section_separators = ' ',
+    -- opts = {
+    --   options = {
+    --     icons_enabled = true,
+    --     theme = 'auto',
+    --     component_separators = '|',
+    --     section_separators = ' ',
+    --   },
+    -- },
+    config = function()
+      require('lualine').setup({
+        options = {
+          theme = 'auto', -- or your favorite theme
+          icons_enabled = true,
+          component_separators = '|',
+          section_separators = ' ',
+          -- ... other options
+        },
+        sections = {
+          lualine_a = { 'mode' },
+          lualine_b = { 'branch', 'diff', 'diagnostics' },
+
+          -- The center section now only has the filename component
+          lualine_c = {
+            {
+              'filename',
+              path = 1, -- Set to 1 for relative path
+            },
+          },
+
+          lualine_x = { 'encoding', 'fileformat', 'filetype' },
+          lualine_y = { 'progress' },
+          lualine_z = { 'location' }
+        },
+      })
+    end,
+  },
+  {
+    'mfussenegger/nvim-dap',
+    dependencies = {
+      -- UI for DAP
+      {
+        'rcarriga/nvim-dap-ui',
+        dependencies = {'nvim-neotest/nvim-nio'},
+      },
+
+      -- Virtual text for diagnostics
+      { 'theHamsta/nvim-dap-virtual-text', opts = {} },
+
+      -- Mason for installing debug adapters
+      { 'williamboman/mason.nvim' },
+      { 'jay-babu/mason-nvim-dap.nvim' },
+      opts = {
+        ensure_installed = { 'debugpy' },
       },
     },
+    config = function()
+      local dap = require('dap')
+      local dapui = require('dapui')
+
+      -- Setup DAP UI
+      dapui.setup()
+
+      -- Automatically configure debug adapters installed by Mason
+      require('mason-nvim-dap').setup({
+        automatic_installation = true,
+        handlers = {}, -- Let mason-nvim-dap handle the setup
+      })
+
+      -- Open/close the UI when a debug session starts/ends
+      dap.listeners.after.event_initialized['dapui_config'] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated['dapui_config'] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited['dapui_config'] = function()
+        dapui.close()
+      end
+
+      -- Keymaps for debugging
+      vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = 'DAP: Toggle Breakpoint' })
+      vim.keymap.set('n', '<leader>dc', dap.continue, { desc = 'DAP: Continue' })
+      vim.keymap.set('n', '<leader>do', dap.step_over, { desc = 'DAP: Step Over' })
+      vim.keymap.set('n', '<leader>di', dap.step_into, { desc = 'DAP: Step Into' })
+      vim.keymap.set('n', '<leader>du', dap.step_out, { desc = 'DAP: Step Out' })
+      vim.keymap.set('n', '<leader>dr', dap.repl.open, { desc = 'DAP: Open REPL' })
+      vim.keymap.set('n', '<leader>dl', dap.run_last, { desc = 'DAP: Run Last' })
+      vim.keymap.set('n', '<leader>du', dapui.toggle, { desc = 'DAP: Toggle UI' })
+    end,
   },
   {
     "folke/noice.nvim",
@@ -221,6 +312,15 @@ require('lazy').setup({
     keys = {
       { "<leader>lz", "<cmd>LazyGit<cr>", desc = "LazyGit" }
     }
+  },
+  {
+    'nvim-flutter/flutter-tools.nvim',
+    lazy = false,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      -- 'stevearc/dressing.nvim', -- optional for vim.ui.select
+    },
+    config = true,
   },
   {
     "kawre/leetcode.nvim",
@@ -336,9 +436,9 @@ local highlight = {
     "Whitespace",
 }
 require("ibl").setup {
-    indent = { highlight = highlight, char = "" },
+    -- indent = { --[[ highlight = highlight ]] char = "" },
     whitespace = {
-        highlight = highlight,
+        -- highlight = highlight,
         remove_blankline_trail = false,
     },
     scope = { enabled = false },
@@ -462,7 +562,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
@@ -503,6 +603,12 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
+
+  if client.server_capabilities.documentSymbolProvider then
+    require('nvim-navic').attach(client, bufnr)
+    vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+  end
+
 end
 
 -- Enable the following language servers
@@ -515,12 +621,12 @@ end
 --  define the property 'filetypes' to the map in question.
 local servers = {
   -- clangd = {},
-  -- gopls = {},
+  gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
+  basedpyright = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -539,8 +645,8 @@ local servers = {
 require('neodev').setup()
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+local capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -548,18 +654,15 @@ local mason_lspconfig = require 'mason-lspconfig'
 mason_lspconfig.setup {
   automatic_installation = true,
   ensure_installed = vim.tbl_keys(servers),
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-
 }
+
+for server_name, config in pairs(servers) do
+    require('lspconfig')[server_name].setup({
+      on_attach = on_attach,
+      capabilities = capabilities,
+      settings = config.settings,
+    })
+end
 
 -- mason_lspconfig.setup_handlers {
 --   function(server_name)
