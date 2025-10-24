@@ -52,7 +52,7 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       -- 'folke/neodev.nvim',
-      { 'folke/neodev.nvim', opts = {} },
+      { 'folke/neodev.nvim',       opts = {} },
     },
   },
 
@@ -85,7 +85,8 @@ require('lazy').setup({
     opts = {
       view_options = {
         show_hidden = true,
-      }
+      },
+      watch_for_changes = true
     },
     -- Optional dependencies
     dependencies = { { "echasnovski/mini.icons", opts = {} } },
@@ -98,12 +99,14 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       on_attach = function(bufnr)
-        vim.keymap.set('n', '<leader>gp', require('gitsigns').prev_hunk,
-          { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
-        vim.keymap.set('n', '<leader>gn', require('gitsigns').next_hunk, { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
+        -- vim.keymap.set('n', '<leader>gp', require('gitsigns').nav_hunk('prev'),
+        --   { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
+        -- vim.keymap.set('n', '<leader>gn', require('gitsigns').nav_hunk('next'), { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
         vim.keymap.set('n', '<leader>ph', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
-        vim.keymap.set('n', '<leader>lh', require('gitsigns').preview_hunk_inline, { buffer = bufnr, desc = '[L]ine preview [H]unk' })
-        vim.keymap.set('n', '<leader>tb', require('gitsigns').toggle_current_line_blame, { buffer = bufnr, desc = '[T]oogle [B]lame' })
+        vim.keymap.set('n', '<leader>lh', require('gitsigns').preview_hunk_inline,
+          { buffer = bufnr, desc = '[L]ine preview [H]unk' })
+        vim.keymap.set('n', '<leader>tb', require('gitsigns').toggle_current_line_blame,
+          { buffer = bufnr, desc = '[T]oogle [B]lame' })
       end,
     },
   },
@@ -118,7 +121,7 @@ require('lazy').setup({
       vim.cmd.colorscheme 'kanagawa'
     end,
   },
-  -- { 
+  -- {
   --   "nyoom-engineering/oxocarbon.nvim"
   -- },
   {
@@ -176,7 +179,7 @@ require('lazy').setup({
       -- UI for DAP
       {
         'rcarriga/nvim-dap-ui',
-        dependencies = {'nvim-neotest/nvim-nio'},
+        dependencies = { 'nvim-neotest/nvim-nio' },
       },
 
       -- Virtual text for diagnostics
@@ -241,19 +244,19 @@ require('lazy').setup({
   },
 
   {
-    -- Add indentation guides even on blank lines
     'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    main = "ibl",
-    ---@module "ibl"
-    ---@type ibl.config
+    main = 'ibl',
     opts = {
-      -- char = ' ',
-      -- show_trailing_blankline_indent = false,
+      -- This is now the ONLY configuration for indent-blankline, so it will work.
+      indent = {
+        char = '·',
+      },
+      scope = { enabled = false },      -- Merged from your old config
+      whitespace = {
+        remove_blankline_trail = false, -- Merged from your old config
+      },
     },
   },
-
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
@@ -294,7 +297,7 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
-  { 
+  {
     "kdheepak/lazygit.nvim",
     cmd = {
       "LazyGit",
@@ -327,7 +330,7 @@ require('lazy').setup({
     build = ":TSUpdate html",
     dependencies = {
       "nvim-telescope/telescope.nvim",
-      "nvim-lua/plenary.nvim",       -- required by telescope
+      "nvim-lua/plenary.nvim", -- required by telescope
       "MunifTanjim/nui.nvim",
 
       -- optional
@@ -398,6 +401,15 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- This is the master switch to make invisible characters visible
+vim.o.list = true
+
+-- This defines WHAT characters to show for each type of whitespace
+vim.opt.listchars = {
+  tab = '» ', -- This is the line that creates the '>>' character for tabs
+  trail = '·', -- A dot for trailing whitespace at the end of a line
+  nbsp = '␣', -- A character for non-breaking spaces
+}
 -- vim.opt.background = "dark" -- set this to dark or light
 -- vim.cmd.colorscheme "oxocarbon"
 -- Set cursor as block
@@ -432,17 +444,17 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 
 local highlight = {
-    "CursorColumn",
-    "Whitespace",
+  "CursorColumn",
+  "Whitespace",
 }
-require("ibl").setup {
-    -- indent = { --[[ highlight = highlight ]] char = "" },
-    whitespace = {
-        -- highlight = highlight,
-        remove_blankline_trail = false,
-    },
-    scope = { enabled = false },
-}
+-- require("ibl").setup {
+--     -- indent = { --[[ highlight = highlight ]] char = "" },
+--     whitespace = {
+--         -- highlight = highlight,
+--         remove_blankline_trail = false,
+--     },
+--     scope = { enabled = false },
+-- }
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -471,11 +483,11 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = '[G]it [F]iles' })
+vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
+vim.keymap.set('n', '<leader>fw', require('telescope.builtin').grep_string, { desc = '[F]ind current [W]ord' })
+vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = '[F]ind by [G]rep' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>lg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
 -- [[ Configure oilnvim]]
@@ -487,7 +499,7 @@ require('nvim-treesitter.configs').setup {
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
-  sync_install =  false,
+  sync_install = false,
   ignore_install = {},
 
   highlight = { enable = true },
@@ -608,7 +620,6 @@ local on_attach = function(client, bufnr)
     require('nvim-navic').attach(client, bufnr)
     vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
   end
-
 end
 
 -- Enable the following language servers
@@ -622,11 +633,11 @@ end
 local servers = {
   -- clangd = {},
   gopls = {},
-  -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
+  ts_ls = {},
+  tailwindcss ={},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-  basedpyright = {},
+  -- basedpyright = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -656,13 +667,18 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
-for server_name, config in pairs(servers) do
-    require('lspconfig')[server_name].setup({
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = config.settings,
-    })
-end
+vim.lsp.config('*', {
+  capabilities = capabilities,
+  on_attach = on_attach
+})
+--
+-- for server_name, config in pairs(servers) do
+--   require('lspconfig')[server_name].setup({
+--     on_attach = on_attach,
+--     capabilities = capabilities,
+--     settings = config.settings,
+--   })
+-- end
 
 -- mason_lspconfig.setup_handlers {
 --   function(server_name)
