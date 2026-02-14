@@ -38,6 +38,13 @@ require('lazy').setup({
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
+    "OXY2DEV/markview.nvim",
+    lazy = false,
+
+    -- Completion for `blink.cmp`
+    -- dependencies = { "saghen/blink.cmp" },
+  },
+  {
     -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -174,7 +181,7 @@ require('lazy').setup({
     end,
   },
   {
-    "esmuellert/vscode-diff.nvim",
+    "esmuellert/codediff.nvim",
     dependencies = { "MunifTanjim/nui.nvim" },
     cmd = "CodeDiff",
     keys = {
@@ -302,9 +309,76 @@ require('lazy').setup({
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
+      -- 'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ':TSUpdate',
+    config = function()
+      require('nvim-treesitter.config').setup {
+        -- Add languages to be installed here that you want installed for treesitter
+        ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+        -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
+        auto_install = false,
+        sync_install = false,
+        ignore_install = {},
+
+        highlight = { enable = true },
+        indent = { enable = true },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = '<c-space>',
+            node_incremental = '<c-space>',
+            scope_incremental = '<c-s>',
+            node_decremental = '<M-space>',
+          },
+        },
+        textobjects = {
+          select = {
+            enable = true,
+            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ['aa'] = '@parameter.outer',
+              ['ia'] = '@parameter.inner',
+              ['af'] = '@function.outer',
+              ['if'] = '@function.inner',
+              ['ac'] = '@class.outer',
+              ['ic'] = '@class.inner',
+            },
+          },
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              [']m'] = '@function.outer',
+              [']]'] = '@class.outer',
+            },
+            goto_next_end = {
+              [']M'] = '@function.outer',
+              [']['] = '@class.outer',
+            },
+            goto_previous_start = {
+              ['[m'] = '@function.outer',
+              ['[['] = '@class.outer',
+            },
+            goto_previous_end = {
+              ['[M'] = '@function.outer',
+              ['[]'] = '@class.outer',
+            },
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ['<leader>a'] = '@parameter.inner',
+            },
+            swap_previous = {
+              ['<leader>A'] = '@parameter.inner',
+            },
+          },
+        },
+      }
+
+    end
   },
   {
     "kdheepak/lazygit.nvim",
@@ -504,70 +578,70 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 --
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
-require('nvim-treesitter.configs').setup {
-  -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
-  -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
-  sync_install = false,
-  ignore_install = {},
-
-  highlight = { enable = true },
-  indent = { enable = true },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = '<c-space>',
-      node_incremental = '<c-space>',
-      scope_incremental = '<c-s>',
-      node_decremental = '<M-space>',
-    },
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ['aa'] = '@parameter.outer',
-        ['ia'] = '@parameter.inner',
-        ['af'] = '@function.outer',
-        ['if'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['ic'] = '@class.inner',
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        [']m'] = '@function.outer',
-        [']]'] = '@class.outer',
-      },
-      goto_next_end = {
-        [']M'] = '@function.outer',
-        [']['] = '@class.outer',
-      },
-      goto_previous_start = {
-        ['[m'] = '@function.outer',
-        ['[['] = '@class.outer',
-      },
-      goto_previous_end = {
-        ['[M'] = '@function.outer',
-        ['[]'] = '@class.outer',
-      },
-    },
-    swap = {
-      enable = true,
-      swap_next = {
-        ['<leader>a'] = '@parameter.inner',
-      },
-      swap_previous = {
-        ['<leader>A'] = '@parameter.inner',
-      },
-    },
-  },
-}
+-- require('nvim-treesitter.configs').setup {
+--   -- Add languages to be installed here that you want installed for treesitter
+--   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+--   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
+--   auto_install = false,
+--   sync_install = false,
+--   ignore_install = {},
+--
+--   highlight = { enable = true },
+--   indent = { enable = true },
+--   incremental_selection = {
+--     enable = true,
+--     keymaps = {
+--       init_selection = '<c-space>',
+--       node_incremental = '<c-space>',
+--       scope_incremental = '<c-s>',
+--       node_decremental = '<M-space>',
+--     },
+--   },
+--   textobjects = {
+--     select = {
+--       enable = true,
+--       lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+--       keymaps = {
+--         -- You can use the capture groups defined in textobjects.scm
+--         ['aa'] = '@parameter.outer',
+--         ['ia'] = '@parameter.inner',
+--         ['af'] = '@function.outer',
+--         ['if'] = '@function.inner',
+--         ['ac'] = '@class.outer',
+--         ['ic'] = '@class.inner',
+--       },
+--     },
+--     move = {
+--       enable = true,
+--       set_jumps = true, -- whether to set jumps in the jumplist
+--       goto_next_start = {
+--         [']m'] = '@function.outer',
+--         [']]'] = '@class.outer',
+--       },
+--       goto_next_end = {
+--         [']M'] = '@function.outer',
+--         [']['] = '@class.outer',
+--       },
+--       goto_previous_start = {
+--         ['[m'] = '@function.outer',
+--         ['[['] = '@class.outer',
+--       },
+--       goto_previous_end = {
+--         ['[M'] = '@function.outer',
+--         ['[]'] = '@class.outer',
+--       },
+--     },
+--     swap = {
+--       enable = true,
+--       swap_next = {
+--         ['<leader>a'] = '@parameter.inner',
+--       },
+--       swap_previous = {
+--         ['<leader>A'] = '@parameter.inner',
+--       },
+--     },
+--   },
+-- }
 
 -- Pane Navigations
 
@@ -644,8 +718,8 @@ local servers = {
   -- clangd = {},
   gopls = {},
   -- rust_analyzer = {},
-  ts_ls = {},
-  tailwindcss ={},
+  -- ts_ls = {},
+  -- tailwindcss ={},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
   -- basedpyright = {},
   lua_ls = {
