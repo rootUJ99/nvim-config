@@ -22,7 +22,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
---
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
@@ -35,8 +34,6 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
-  -- NOTE: This is where your plugins related to LSP can be installed.
-  --  The configuration is done below. Search for lspconfig to find it below.
   {
     "OXY2DEV/markview.nvim",
     lazy = false,
@@ -44,6 +41,8 @@ require('lazy').setup({
     -- Completion for `blink.cmp`
     -- dependencies = { "saghen/blink.cmp" },
   },
+  -- NOTE: This is where your plugins related to LSP can be installed.
+  --  The configuration is done below. Search for lspconfig to find it below.
   {
     -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -106,14 +105,27 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       on_attach = function(bufnr)
-        -- vim.keymap.set('n', '<leader>gp', require('gitsigns').nav_hunk('prev'),
-        --   { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
-        -- vim.keymap.set('n', '<leader>gn', require('gitsigns').nav_hunk('next'), { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
-        vim.keymap.set('n', '<leader>ph', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
-        vim.keymap.set('n', '<leader>lh', require('gitsigns').preview_hunk_inline,
-          { buffer = bufnr, desc = '[L]ine preview [H]unk' })
-        vim.keymap.set('n', '<leader>tb', require('gitsigns').toggle_current_line_blame,
-          { buffer = bufnr, desc = '[T]oogle [B]lame' })
+        vim.keymap.set('n', ']h', function()
+          if vim.wo.diff then
+            vim.cmd.normal({']h', bang = true})
+          else
+            require('gitsigns').nav_hunk('next')
+          end
+        end, { buffer = bufnr, desc = '[J]ump Hunk [F]orward' })
+
+        vim.keymap.set('n', '[h', function()
+          if vim.wo.diff then
+            vim.cmd.normal({'[h', bang = true})
+          else
+            require('gitsigns').nav_hunk('prev')
+          end
+        end, { buffer = bufnr, desc = '[J]ump Hunk [B]ackward' })
+        vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
+        vim.keymap.set('n', '<leader>hi', require('gitsigns').preview_hunk_inline, { buffer = bufnr, desc = '[P]review Inline [H]unk' })
+        vim.keymap.set('n', '<leader>hb', require('gitsigns').toggle_current_line_blame, { buffer = bufnr, desc = '[T]oggle [B]lame' })
+        vim.keymap.set('n', '<leader>hr', require('gitsigns').reset_hunk, { buffer = bufnr, desc = '[R]eset [H]unk' })
+        vim.keymap.set('n', '<leader>hR', require('gitsigns').reset_buffer, { buffer = bufnr, desc = '[R]eset [B]uffer' })
+        vim.keymap.set('n', '<leader>hd', require('gitsigns').diffthis, { buffer = bufnr, desc = '[D]iff [H]unk' })
       end,
     },
   },
@@ -303,7 +315,7 @@ require('lazy').setup({
   --   vim.keymap.set('n', 'c-l', ':TmuxNavigateRight<CR>'),
   --   vim.keymap.set('n', 'c-k', ':TmuxNavigateUp<CR>'),
   --   vim.keymap.set('n', 'c-j', ':TmuxNavigateDown<CR>')
-  --
+  -- 
   -- },
   {
     -- Highlight, edit, and navigate code
@@ -435,7 +447,7 @@ require('lazy').setup({
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --
+  -- 
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
@@ -531,7 +543,7 @@ local highlight = {
   "Whitespace",
 }
 -- require("ibl").setup {
---     -- indent = { --[[ highlight = highlight ]] char = "" },
+--     -- indent = { -- [[ highlight = highlight ]] char = "" },
 --     whitespace = {
 --         -- highlight = highlight,
 --         remove_blankline_trail = false,
@@ -568,6 +580,15 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = '[G]it [F]iles' })
 vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = '[G]it [S]tatus' })
+vim.keymap.set('n', '<leader>gt', require('telescope.builtin').git_stash, { desc = '[G]it [S]tash' })
+vim.keymap.set('n', '<leader>gc', require('telescope.builtin').git_commits, { desc = '[G]it [C]ommits' })
+vim.keymap.set('n', '<leader>gb', require('telescope.builtin').git_branches, { desc = '[G]it [B]ranches' })
+
+vim.keymap.set('n', '<leader>m', require('telescope.builtin').marks, { desc = '[M]arks' })
+vim.keymap.set('n', '<leader>j', require('telescope.builtin').jumplist, { desc = '[J]ump [L]ist' })
+
+vim.keymap.set('n', '<leader>lr', require('telescope.builtin').lsp_references, { desc = '[D]ocument [S]ymbol' })
+-- vim.keymap.set('n', '<leader>ls', require('telescope.builtin').lsp_, { desc = '[D]ocument [S]ymbol' })
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
 vim.keymap.set('n', '<leader>fw', require('telescope.builtin').grep_string, { desc = '[F]ind current [W]ord' })
 vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = '[F]ind by [G]rep' })
@@ -575,7 +596,7 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
 -- [[ Configure oilnvim]]
---
+-- 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- require('nvim-treesitter.configs').setup {
@@ -585,7 +606,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 --   auto_install = false,
 --   sync_install = false,
 --   ignore_install = {},
---
+-- 
 --   highlight = { enable = true },
 --   indent = { enable = true },
 --   incremental_selection = {
@@ -662,7 +683,7 @@ local on_attach = function(client, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
-  --
+  -- 
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
   local nmap = function(keys, func, desc)
@@ -708,10 +729,10 @@ end
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
+-- 
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
---
+-- 
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
@@ -755,7 +776,7 @@ vim.lsp.config('*', {
   capabilities = capabilities,
   on_attach = on_attach
 })
---
+-- 
 -- for server_name, config in pairs(servers) do
 --   require('lspconfig')[server_name].setup({
 --     on_attach = on_attach,
