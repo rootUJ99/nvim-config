@@ -206,8 +206,8 @@ require('lazy').setup({
     dependencies = {
       -- UI for DAP
       {
-        'rcarriga/nvim-dap-ui',
-        dependencies = { 'nvim-neotest/nvim-nio' },
+        'igorlfs/nvim-dap-view', 
+        opts = { auto_toggle = true } 
       },
 
       -- Virtual text for diagnostics
@@ -217,42 +217,32 @@ require('lazy').setup({
       { 'williamboman/mason.nvim' },
       { 'jay-babu/mason-nvim-dap.nvim' },
       opts = {
-        ensure_installed = { 'debugpy' },
+        ensure_installed = { 'debugpy', 'delve', 'js-debug-adapter' },
+        automatic_installation = true,
+        handlers = {},
       },
+      {
+        'mxsdev/nvim-dap-vscode-js',
+        opts = {
+          -- Tell the plugin where Mason installed the adapter
+          debugger_path = vim.fn.stdpath('data') .. '/mason/packages/js-debug-adapter',
+          adapters = { 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal', 'pwa-extensionHost' },
+        }
+      }
     },
     config = function()
       local dap = require('dap')
-      local dapui = require('dapui')
-
-      -- Setup DAP UI
-      dapui.setup()
-
-      -- Automatically configure debug adapters installed by Mason
-      require('mason-nvim-dap').setup({
-        automatic_installation = true,
-        handlers = {}, -- Let mason-nvim-dap handle the setup
-      })
-
-      -- Open/close the UI when a debug session starts/ends
-      dap.listeners.after.event_initialized['dapui_config'] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated['dapui_config'] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited['dapui_config'] = function()
-        dapui.close()
-      end
-
+      local dv = require('dap-view')
+      print("holla hoooo")
       -- Keymaps for debugging
-      vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = 'DAP: Toggle Breakpoint' })
-      vim.keymap.set('n', '<leader>dc', dap.continue, { desc = 'DAP: Continue' })
-      vim.keymap.set('n', '<leader>do', dap.step_over, { desc = 'DAP: Step Over' })
-      vim.keymap.set('n', '<leader>di', dap.step_into, { desc = 'DAP: Step Into' })
-      vim.keymap.set('n', '<leader>du', dap.step_out, { desc = 'DAP: Step Out' })
-      vim.keymap.set('n', '<leader>dr', dap.repl.open, { desc = 'DAP: Open REPL' })
-      vim.keymap.set('n', '<leader>dl', dap.run_last, { desc = 'DAP: Run Last' })
-      vim.keymap.set('n', '<leader>du', dapui.toggle, { desc = 'DAP: Toggle UI' })
+      vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = '[DAP] [T]oggle [B]reakpoint' })
+      vim.keymap.set('n', '<leader>dc', dap.continue, { desc = '[DAP] [C]ontinue' })
+      vim.keymap.set('n', '<leader>do', dap.step_over, { desc = '[DAP] [S]tep [O]ver' })
+      vim.keymap.set('n', '<leader>di', dap.step_into, { desc = '[DAP] [S]tep [I]nto' })
+      vim.keymap.set('n', '<leader>du', dap.step_out, { desc = '[DAP] [S]tep [O]ut' })
+      vim.keymap.set('n', '<leader>dr', dap.repl.open, { desc = '[DAP] [O]pen [REPL]' })
+      vim.keymap.set('n', '<leader>dl', dap.run_last, { desc = '[DAP] [R]un [L]ast' })
+      vim.keymap.set('n', '<leader>dv', dv.toggle, { desc = '[DAP] [T]oggle [UI]' })
     end,
   },
   {
